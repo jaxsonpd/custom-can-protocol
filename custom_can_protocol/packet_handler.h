@@ -41,10 +41,9 @@ packetStatus_t packet_validate(uint8_t* packetBuffer, uint16_t bufferLength);
  * @param payloadLength the length of the payload
  * @param commandByte the command byte to send
  * 
- * @return the status of the packet should mainly be schema errors
- * due to using reserved bytes for command or length
+ * @return the length of the packet that was compiled 0 if an error occurs
  */
-packetStatus_t packet_compile(uint8_t* packetBuf, uint8_t* payloadBuf, uint8_t payloadLength, packetIdentifier_t packetIdent);
+uint16_t packet_compile(uint8_t* packetBuf, uint8_t* payloadBuf, uint8_t payloadLength, uint8_t packetIdent);
 
 
 #endif // PACKET_DECODER_H

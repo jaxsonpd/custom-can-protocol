@@ -10,9 +10,9 @@
 #include <stdbool.h>
 #include "stdlib.h"
 
-#include "packet.h"
+#include "../custom_can_protocol/packet.h"
 
-#include "packet_handler.h"
+#include "../custom_can_protocol/packet_handler.h"
 
 typedef enum packetStates_e {
     START_BYTE,
@@ -25,14 +25,14 @@ typedef enum packetStates_e {
 } packetState_t;
 
 static uint16_t calculate_crc16(const uint8_t *data, uint16_t length) {
-    uint16_t crc = 0xFFFF; // Start with the initial CRC value
-    const uint16_t polynomial = PACKET_CRC_POLYNOMIAL; // CRC-16-CCITT polynomial
+    uint16_t crc = 0xFFFF;
+    const uint16_t polynomial = PACKET_CRC_POLYNOMIAL;
 
     for (uint16_t i = 0; i < length; i++) {
-        crc ^= (data[i] << 8); // XOR the byte into the high order byte of the CRC
+        crc ^= (data[i] << 8);
 
         for (uint8_t bit = 0; bit < 8; bit++) {
-            if (crc & 0x8000) { // Check if the MSB is set
+            if (crc & 0x8000) {
                 crc = (crc << 1) ^ polynomial;
             } else {
                 crc <<= 1;
@@ -40,7 +40,7 @@ static uint16_t calculate_crc16(const uint8_t *data, uint16_t length) {
         }
     }
 
-    return crc; // Return the computed CRC-16 value
+    return crc;
 }
 
 packetStatus_t packet_validate(uint8_t* packetBuffer, uint16_t bufferLength) {
@@ -77,7 +77,7 @@ packetStatus_t packet_validate(uint8_t* packetBuffer, uint16_t bufferLength) {
                     return PACKET_SCHEMA_ERROR;
                 }
                 payloadLength = byte;
-                if (payloadLength + HEADER_SIZE + CRC_LENGTH + FOOTER_SIZE > bufferLength) {
+                if (payloadLength + PACKET_HEADER_SIZE + CRC_LENGTH + PACKET_FOOTER_SIZE > bufferLength) {
                     return PACKET_LENGTH_ERROR;
                 }
                 state = PACKET_DATA_BYTES;
@@ -126,11 +126,11 @@ packetStatus_t packet_validate(uint8_t* packetBuffer, uint16_t bufferLength) {
     return (state == PACKET_COMPLETE) ? PACKET_VALID : PACKET_SCHEMA_ERROR;
 }
 
-packetStatus_t packet_compile(uint8_t* packetBuf, uint8_t* payloadBuf, uint8_t payloadLength, packetIdentifier_t packetIdent) {
+uint16_t packet_compile(uint8_t* packetBuf, uint8_t* payloadBuf, uint8_t payloadLength, uint8_t packetIdent) {
     if (packetBuf == NULL) {
-        return PACKET_UNKOWN_ERROR;
+        return 0;
     } else if (payloadBuf == NULL && payloadLength > 0) {
-        return PACKET_UNKOWN_ERROR;
+        return 0;
     }
 
     packetBuf[0] = PACKET_START_BYTE;
@@ -148,5 +148,5 @@ packetStatus_t packet_compile(uint8_t* packetBuf, uint8_t* payloadBuf, uint8_t p
 
     packetBuf[PACKET_PAYLOAD_START_LOC+payloadLength+2] = PACKET_END_BYTE;
 
-    return PACKET_VALID;
+    return PACKET_HEADER_SIZE+PACKET_FOOTER_SIZE+payloadLength+2;
 }
