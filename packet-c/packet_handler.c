@@ -150,3 +150,15 @@ uint16_t packet_compile(uint8_t* packetBuf, uint8_t* payloadBuf, uint8_t payload
 
     return PACKET_HEADER_SIZE+PACKET_FOOTER_SIZE+payloadLength+2;
 }
+
+int packet_send(int (sendByte)(int), uint8_t* payloadBuf, uint8_t payloadLength, uint8_t packetIdent) {
+    uint8_t sendBuffer[1024] = {0};
+    
+    uint8_t packetLength = packet_compile(sendBuffer, payloadBuf, payloadLength, packetIdent);
+
+    for (uint16_t i = 0; i < packetLength; i++) {
+        sendByte(sendBuffer[i]);
+    }
+
+    return 0;
+}

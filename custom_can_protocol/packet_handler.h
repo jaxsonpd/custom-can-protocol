@@ -39,11 +39,22 @@ packetStatus_t packet_validate(uint8_t* packetBuffer, uint16_t bufferLength);
  * @param packetBuf a pointer of the location to store the packet
  * @param payloadBuf the payload to send
  * @param payloadLength the length of the payload
- * @param commandByte the command byte to send
+ * @param packetIdent the identity byte to send
  * 
  * @return the length of the packet that was compiled 0 if an error occurs
  */
 uint16_t packet_compile(uint8_t* packetBuf, uint8_t* payloadBuf, uint8_t payloadLength, uint8_t packetIdent);
+
+/** 
+ * @brief Send a packet using the method provided
+ * @param sendByte a function to use to send the bytes
+ * @param payloadBuf the payload to send
+ * @param payloadLength the length of the payload
+ * @param packetIdent the identity byte to send
+ * 
+ * @return 0 if successful 
+ */
+int packet_send(int (sendByte)(int), uint8_t* payloadBuf, uint8_t payloadLength, uint8_t packetIdent);
 
 
 #endif // PACKET_DECODER_H
