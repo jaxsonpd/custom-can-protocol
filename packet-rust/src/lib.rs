@@ -1,7 +1,8 @@
 pub const PACKET_START_BYTE: u8 = 0x7E;
-pub const PACKET_END_BYTE: u8 = 0x7E;
+pub const PACKET_END_BYTE: u8 = 0x7F;
 
 pub const MIN_PACKET_LENGTH: usize = 6;
+pub const MAX_PACKET_LENGTH: usize = 1024;
 pub const PACKET_HEADER_SIZE: usize = 3;
 pub const PACKET_FOOTER_SIZE: usize = 1;
 

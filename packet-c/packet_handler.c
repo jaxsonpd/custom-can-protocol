@@ -152,7 +152,7 @@ uint16_t packet_compile(uint8_t* packetBuf, uint8_t* payloadBuf, uint8_t payload
 }
 
 int packet_send(int (sendByte)(int), uint8_t* payloadBuf, uint8_t payloadLength, uint8_t packetIdent) {
-    uint8_t sendBuffer[1024] = {0};
+    uint8_t sendBuffer[MAX_PACKET_LENGTH] = {0};
     
     uint8_t packetLength = packet_compile(sendBuffer, payloadBuf, payloadLength, packetIdent);
 

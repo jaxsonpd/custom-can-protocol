@@ -14,9 +14,10 @@
 #include <stdbool.h>
 
 #define PACKET_START_BYTE 0x7E
-#define PACKET_END_BYTE 0x7E
+#define PACKET_END_BYTE 0x7F
 
 #define MIN_PACKET_LENGTH 6
+#define MAX_PACKET_LENGTH 1024
 #define PACKET_HEADER_SIZE 3
 #define PACKET_FOOTER_SIZE 1
 
