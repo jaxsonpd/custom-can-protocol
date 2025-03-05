@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "stdlib.h"
+#include <stdio.h>
 
 #include "../custom_can_protocol/packet.h"
 
@@ -126,7 +126,7 @@ packetStatus_t packet_validate(uint8_t* packetBuffer, uint16_t bufferLength) {
     return (state == PACKET_COMPLETE) ? PACKET_VALID : PACKET_SCHEMA_ERROR;
 }
 
-uint16_t packet_compile(uint8_t* packetBuf, uint8_t* payloadBuf, uint8_t payloadLength, uint8_t packetIdent) {
+uint16_t packet_compile(uint8_t* packetBuf, uint8_t* payloadBuf, uint16_t payloadLength, uint8_t packetIdent) {
     if (packetBuf == NULL) {
         return 0;
     } else if (payloadBuf == NULL && payloadLength > 0) {
@@ -151,14 +151,38 @@ uint16_t packet_compile(uint8_t* packetBuf, uint8_t* payloadBuf, uint8_t payload
     return PACKET_HEADER_SIZE+PACKET_FOOTER_SIZE+payloadLength+2;
 }
 
-int packet_send(int (sendByte)(int), uint8_t* payloadBuf, uint8_t payloadLength, uint8_t packetIdent) {
+int packet_send(int (sendByte)(int), uint8_t* payloadBuf, uint16_t payloadLength, uint8_t packetIdent) {
     uint8_t sendBuffer[MAX_PACKET_LENGTH] = {0};
-    
-    uint8_t packetLength = packet_compile(sendBuffer, payloadBuf, payloadLength, packetIdent);
-
+    uint16_t packetLength = packet_compile(sendBuffer, payloadBuf, payloadLength, packetIdent);
     for (uint16_t i = 0; i < packetLength; i++) {
         sendByte(sendBuffer[i]);
     }
 
     return 0;
+}
+
+uint16_t packet_receive(int (readByte)(void), uint8_t *buffer) {
+    uint16_t idx = 0;
+    
+    int byte;
+    while ((byte = readByte()) != EOF) {
+        if (byte == PACKET_START_BYTE) {
+            buffer[idx++] = PACKET_START_BYTE;
+            break;
+        }
+    }
+
+    if (byte == EOF) {
+        return 0;
+    }
+
+    while (idx < MAX_PACKET_LENGTH) {
+        buffer[idx++] = readByte();
+
+        if (buffer[idx-1] == PACKET_END_BYTE) {
+            break;
+        }
+    }
+
+    return idx;
 }
