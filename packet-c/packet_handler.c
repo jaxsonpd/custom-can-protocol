@@ -167,7 +167,7 @@ uint16_t packet_receive(int (readByte)(void), uint8_t *buffer) {
     int byte;
     while ((byte = readByte()) != EOF) {
         if (byte == PACKET_START_BYTE) {
-            buffer[idx++] = PACKET_START_BYTE;
+            buffer[idx++] = (uint8_t)PACKET_START_BYTE;
             break;
         }
     }
@@ -177,9 +177,13 @@ uint16_t packet_receive(int (readByte)(void), uint8_t *buffer) {
     }
 
     while (idx < MAX_PACKET_LENGTH) {
-        buffer[idx++] = readByte();
+        byte = readByte();
 
-        if (buffer[idx-1] == PACKET_END_BYTE) {
+        if (byte == EOF) {
+            continue;
+        }
+        buffer[idx++] = (uint8_t)byte;
+        if (byte == PACKET_END_BYTE) {
             break;
         }
     }
