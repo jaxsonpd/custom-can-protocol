@@ -131,8 +131,9 @@ impl Packet {
                     if current_byte + 2 > buffer.len() {
                         return Err(PacketValidationError::SchemaError);
                     }
-                    let crc16 = Packet::calculate_crc16(&buffer[(PacketByteLocations::PacketLengthLoc as usize)
-                                                            ..(PacketByteLocations::PacketLengthLoc as usize + PacketByteLocations::PacketLengthLoc as usize)]);
+                    let crc16 = Packet::calculate_crc16(&buffer[(PacketByteLocations::PacketPayloadStartLoc as usize)
+                                                                            ..(PacketByteLocations::PacketPayloadStartLoc as usize 
+                                                                            + buffer[PacketByteLocations::PacketLengthLoc as usize] as usize)]);
                     let received_crc16 = ((buffer[current_byte] as u16) << 8)
                         | (buffer[current_byte + 1] as u16);
                     if crc16 != received_crc16 {
@@ -163,12 +164,24 @@ impl Packet {
         let mut buffer = Vec::new();
         let mut byte = [0u8; 1];
 
+        println!("Reading from stream");
+
         loop {
-            if byte[0] == PACKET_START_BYTE {
-                buffer.push(PACKET_START_BYTE);
-                break;
+            match read_byte.read(&mut byte) {
+                Ok(1) => {
+                    if byte[0] == PACKET_START_BYTE {
+                        buffer.push(PACKET_START_BYTE);
+                        break;
+                    }
+
+                    println!("Read byte: {}", byte[0]);
+                },
+                _ => continue
             }
+            
         }
+
+        println!("Got start");
 
         while buffer.len() < MAX_PACKET_LENGTH {
             match read_byte.read(&mut byte) {
@@ -177,6 +190,8 @@ impl Packet {
                     if byte[0] == PACKET_END_BYTE {
                         break;
                     }
+
+                    println!("Read byte: {}", byte[0]);
                 },
                 _ => continue
             }
@@ -187,7 +202,9 @@ impl Packet {
                 buffer: buffer.to_vec(),
                 packet_ident: buffer[PacketByteLocations::PacketIdentifierLoc as usize],
                 payload_length: buffer[PacketByteLocations::PacketLengthLoc as usize],
-                payload: buffer[(PacketByteLocations::PacketLengthLoc as usize)..(PacketByteLocations::PacketLengthLoc as usize + PacketByteLocations::PacketLengthLoc as usize)].to_vec(),
+                payload: buffer[(PacketByteLocations::PacketPayloadStartLoc as usize)
+                                ..(PacketByteLocations::PacketPayloadStartLoc as usize 
+                                + buffer[PacketByteLocations::PacketLengthLoc as usize] as usize)].to_vec(),
                 packet_buffer: buffer.to_vec(),
             }),
             Err(e) => Err(e)
