@@ -163,9 +163,7 @@ impl Packet {
     pub fn read_from_stream(read_byte: &mut dyn Read) -> Result<Self, PacketValidationError> {
         let mut buffer = Vec::new();
         let mut byte = [0u8; 1];
-
-        println!("Reading from stream");
-
+        
         loop {
             match read_byte.read(&mut byte) {
                 Ok(1) => {
@@ -173,15 +171,11 @@ impl Packet {
                         buffer.push(PACKET_START_BYTE);
                         break;
                     }
-
-                    println!("Read byte: {}", byte[0]);
                 },
                 _ => continue
             }
             
         }
-
-        println!("Got start");
 
         while buffer.len() < MAX_PACKET_LENGTH {
             match read_byte.read(&mut byte) {
@@ -190,8 +184,6 @@ impl Packet {
                     if byte[0] == PACKET_END_BYTE {
                         break;
                     }
-
-                    println!("Read byte: {}", byte[0]);
                 },
                 _ => continue
             }
