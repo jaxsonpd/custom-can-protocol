@@ -2,6 +2,17 @@
 
 A light-weight custom can bus like packet format for use in limited power applications
 
+There are two implementions a rust a c.
+
+The c implementation uses cmake and cab be included like
+any other library. the packet processing module
+for the c implementation is limited to a certain number
+of identifiers which can be seen in custom_can_protocol/packet.c.
+
+
+the rust can be included using cargo git or by linking a local
+library.
+
 ## Protocol Definitions
 
 The protocol is losely based on the can bus packet structure. With the following features:
@@ -20,13 +31,13 @@ The protocol is losely based on the can bus packet structure. With the following
 | Payload Length | 1 Byte | Length of the Payload |
 | Payload | N Byte | The data |
 | CRC | 2 Byte | CRC-16 for error checking |
-| End Byte `0x7E` | 1 Byte | Frame Delimiter |
+| End Byte `0x7F` | 1 Byte | Frame Delimiter |
 
 ### Reserved Packet Identifiers
 
 | Identifier | Function | Direction |
 | - | - | - |
-| 0xFF | Protocol Command | Both |
+| 0x00 | Protocol Command | Both |
 
 ### Example Packet: Frequency Update
 
@@ -54,9 +65,9 @@ The protocol packet is used to send protocol commands the supported commands are
 
 ```yaml
 Start Byte:      0x7E
-Identifier:      0xFF
-Payload Length:  6
-Payload:         [0x00, 0x00] (Acknowledge 0x00 type packet)
+Identifier:      0x00
+Payload Length:  2
+Payload:         [0x00, 0x01] (Acknowledge 0x01 type packet)
 CRC:             0x1234 (not correct)
 End Byte:        0x7E
 ```
