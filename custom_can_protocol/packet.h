@@ -25,9 +25,9 @@
 
 #define PACKET_CRC_POLYNOMIAL 0x1021
 
-#define PROTOCOL_PACKET_IDENTIFIER 0xFF // Identifies a protocol packet not a data packet
+#define PROTOCOL_PACKET_IDENTIFIER 0x00 // Identifies a protocol packet not a data packet
 
-#define MAX_NUM_IDENTIFIERS 0xFF // The maximum number of identifiers should be the same as the highest possible identifier. 
+#define MAX_NUM_IDENTIFIERS 50 // The maximum number of identifiers should be the same as the highest possible identifier. 
 
 enum packetByteLocations_e {
     PACKET_IDENTIFIER_LOC = 0x01,
