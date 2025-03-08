@@ -2,16 +2,25 @@
 
 A light-weight custom can bus like packet format for use in limited power applications
 
-There are two implementions a rust a c.
+There are two implementions in rust or c.
 
-The c implementation uses cmake and cab be included like
-any other library. the packet processing module
+The c implementation uses cmake and can be included like
+any other library. The packet processing module
 for the c implementation is limited to a certain number
 of identifiers which can be seen in custom_can_protocol/packet.c.
 
-
-the rust can be included using cargo git or by linking a local
+The rust implementation can be included using cargo git or by linking a local
 library.
+
+The libraries are generally layed out with the following methods:
+
+- packet verifier - verify that a packet is correct.
+- packet compilier - compile a packet to send
+- packet sender - write a packet to stream
+- packet receive - read a packet from stream
+
+- packet register callback - register a packet
+- packet process - process a packet calling the relevant callback
 
 ## Protocol Definitions
 
