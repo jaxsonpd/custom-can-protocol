@@ -48,7 +48,6 @@ pub struct Packet {
     pub packet_ident: u8,
     pub payload_length: u8,
     pub payload: Vec<u8>,
-    pub packet_buffer: Vec<u8>,
 }
 
 pub trait PacketHandler {
@@ -172,7 +171,7 @@ impl Packet {
                         break;
                     }
                 },
-                _ => continue
+                _ => break
             }
             
         }
@@ -185,7 +184,7 @@ impl Packet {
                         break;
                     }
                 },
-                _ => continue
+                _ => break
             }
         }
 
@@ -197,14 +196,13 @@ impl Packet {
                 payload: buffer[(PacketByteLocations::PacketPayloadStartLoc as usize)
                                 ..(PacketByteLocations::PacketPayloadStartLoc as usize 
                                 + buffer[PacketByteLocations::PacketLengthLoc as usize] as usize)].to_vec(),
-                packet_buffer: buffer.to_vec(),
             }),
             Err(e) => Err(e)
         }
     }
 
     // Constructor to initialize a new Packet
-    pub fn new(packet_ident: u8, payload: Vec<u8>, packet_buffer: Vec<u8>) -> Self {
+    pub fn new(packet_ident: u8, payload: Vec<u8>) -> Self {
         let payload_length = payload.len() as u8;
         let buffer =
             vec![0; PACKET_HEADER_SIZE + payload_length as usize + CRC_LENGTH + PACKET_FOOTER_SIZE];
@@ -214,7 +212,6 @@ impl Packet {
             packet_ident,
             payload_length,
             payload,
-            packet_buffer,
         }
     }
 
