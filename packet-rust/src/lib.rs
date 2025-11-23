@@ -1,4 +1,5 @@
-use std::{error::Error, io::{Read, Write}};
+use core::time;
+use std::{error::Error, io::{Read, Write}, thread};
 
 use std::fmt;
 
@@ -245,6 +246,7 @@ impl Packet {
     pub fn write_to_stream(&self, send_byte: &mut dyn Write) {
         for byte in &self.buffer {
             send_byte.write_all(&[*byte]).unwrap();
+            thread::sleep(time::Duration::from_millis(5));
         }
     }
 }
