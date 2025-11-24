@@ -76,9 +76,9 @@ impl Packet {
         crc
     }
 
-    pub fn validate_packet(buffer: &[u8]) -> Result<(), PacketValidationError> {
+    pub fn validate_packet(buffer: &[u8]) -> Result<(), PacketValidationError> {        
         if buffer.len() < MIN_PACKET_LENGTH {
-            return Err(PacketValidationError::SchemaError);
+            return Err(PacketValidationError::LengthError);
         }
 
         let mut current_byte = 0;
@@ -89,14 +89,22 @@ impl Packet {
 
             match state {
                 PacketState::StartByte => {
-                    if byte != PACKET_START_BYTE || current_byte != 0 {
+                    if current_byte != 0 {
+                        return Err(PacketValidationError::LengthError);
+                    }
+
+                    if byte != PACKET_START_BYTE {
                         return Err(PacketValidationError::SchemaError);
                     }
                     state = PacketState::CmdByte;
                     current_byte += 1;
                 }
                 PacketState::CmdByte => {
-                    if byte == PACKET_START_BYTE || byte == PACKET_END_BYTE || current_byte != 1 {
+                    if current_byte != 1 {
+                        return Err(PacketValidationError::LengthError);
+                    }
+
+                    if byte == PACKET_START_BYTE || byte == PACKET_END_BYTE  {
                         return Err(PacketValidationError::SchemaError);
                     }
                     state = PacketState::PacketLengthByte;
@@ -104,7 +112,7 @@ impl Packet {
                 }
                 PacketState::PacketLengthByte => {
                     if current_byte != 2 {
-                        return Err(PacketValidationError::SchemaError);
+                        return Err(PacketValidationError::LengthError);
                     }
                     let payload_length = byte as usize;
                     if payload_length + PACKET_HEADER_SIZE + CRC_LENGTH + PACKET_FOOTER_SIZE
@@ -129,7 +137,7 @@ impl Packet {
                 }
                 PacketState::CrcBytes => {
                     if current_byte + 2 > buffer.len() {
-                        return Err(PacketValidationError::SchemaError);
+                        return Err(PacketValidationError::LengthError);
                     }
                     let crc16 = Packet::calculate_crc16(&buffer[(PacketByteLocations::PacketPayloadStartLoc as usize)
                                                                             ..(PacketByteLocations::PacketPayloadStartLoc as usize 
